@@ -90,22 +90,40 @@ def getEyeBorders(imgW: int, imagePixels: List[Pixel]) -> List[Tuple[int, int, i
             # 
 
             # First do a sanity check: do not exceed list range!
-            if((idp + 0 + 4*imgW) > len(imagePixels)):
+            # @see logic in the next comment for why (idp - 0 + 4*imgW) makes
+            # sense.
+            if((idp - 0 + 4*imgW) > len(imagePixels)):
                 # No need to check further, skip whole rest of image!
                 # Saves some time too, since no further pixel checks are
                 # needed.
                 break
 
-            # 3 bottom pixels
-            pxlB_1 = imagePixels[idp + 0 + 4*imgW].red
-            pxlB_2 = imagePixels[idp + 0 + 4*imgW].red
-            pxlB_3 = imagePixels[idp + 0 + 4*imgW].red
+            # 3 bottom pixels.
+            # idp is currently pointing at the last of the 3 pixels (the dashes
+            # in the eye pattern).
+            # To check the row of dashes downstairs, go back 2 pixels to the 
+            # first of the bottom row pixels.
+            # _____________________________________________
+            # |                    idp                    |
+            # |                    |                      | 
+            # |                * * X                      |
+            # |                                           | 
+            # |                 eye                       |    
+            # |                                           |
+            # |                Y * *                      |
+            # |                ^                          |
+            # |                |                          |
+            # |                idp - 2 + 4*imgW           |
+            # _____________________________________________
+            pxlB_1 = imagePixels[idp - 2 + 4*imgW].red
+            pxlB_2 = imagePixels[idp - 1 + 4*imgW].red
+            pxlB_3 = imagePixels[idp - 0 + 4*imgW].red
             # Check if bottom pixels are part of an eye
             if(pxlB_1 >= 200 and pxlB_2 >= 200 and pxlB_3 >= 200):
                 eyeCoords = getEyeCoordinates(pixelId=idp,
                                                 imgW=imgW,
                                                 imagePixels=imagePixels)
-
+                # Will be None if left or right borders are missing.
                 if eyeCoords is not None:
                     coordinates.append(eyeCoords)
                 else:
